@@ -1,0 +1,100 @@
+import requests
+from tkinter import *
+
+
+def click():
+    token = '*****************************'
+    version = 5.92
+    domain = str(en2.get())
+    count = 5000
+    order = 'name'
+    response = requests.get('https://api.vk.com/method/friends.get',
+                            params={
+                                'access_token': token,
+                                'v': version,
+                                'user_id': domain,
+                                'count': count,
+                                'order': order
+                            })
+    data1 = response.json()['response']['items']
+
+    mxlike = 0
+    count = 100
+    version = 5.92
+    text1 = 'Нет текста'
+    for id in data1:
+        try:
+            domain = str(id)
+            all_posts = []
+            offset = 0
+            count = 100
+            while offset < 1000:
+                if not domain.isdigit():
+                    response = requests.get('https://api.vk.com/method/wall.get',
+                                            params={
+                                                'access_token': token,
+                                                'v': version,
+                                                'domain': domain,
+                                                'count': count,
+                                                'offset': offset
+                                            }
+                                            )
+                else:
+                    response = requests.get('https://api.vk.com/method/wall.get',
+                                            params={
+                                                'access_token': token,
+                                                'v': version,
+                                                'owner_id': domain,
+                                                'count': count,
+                                                'offset': offset
+                                            }
+                                            )
+
+                data = response.json()['response']['items']
+                offset += 100
+                all_posts.extend(data)
+            n = -1
+            k2 = 0
+            for posts in all_posts:
+                n += 1
+                k = all_posts[n]['likes']['count']
+                if k > mxlike:
+                    mxlike = k
+                    try:
+                        text1 = all_posts[n]['attachments'][0]['photo']['text']
+                    except:
+                        pass
+        except:
+            k += 1
+    bgc = "#999"
+    window = Tk()
+    window.configure(background=bgc)
+    window.title('VkMaxAnalistorLikes')
+    window.geometry('400x100+300+300')
+    widgt2 = Label(window, text='Наибольшее количество лайков:', bg='grey')
+    widgt2.place(x=10, y=30)
+    widgt2 = Label(window, text=mxlike, bg='grey')
+    widgt2.place(x=195, y=30)
+    widgt2 = Label(window, text='Скрытых профилей', bg='grey')
+    widgt2.place(x=10, y=50)
+    widgt2 = Label(window, text=k, bg='grey')
+    widgt2.place(x=160, y=50)
+
+bgc = "#999"
+window = Tk()
+window.configure(background=bgc)
+window.title('VkAnalistorLikes')
+window.geometry('350x100+300+300')
+en2 = Entry(window, width=30)
+en2.place(x=100, y=50)
+btn = Button(text='Принять', bg='black', fg='yellow', command=click)
+btn.place(x=290, y=50)
+widgt2 = Label(window, text='Введите id:          ', bg='grey')
+widgt2.place(x=5, y=50)
+widgt1 = Label(window, text='----------', bg='grey')
+widgt1.place(x=5, y=10)
+bgc = "#999"
+
+
+window.mainloop()
+
